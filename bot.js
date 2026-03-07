@@ -304,11 +304,14 @@ inline_keyboard: [
 }
 
 function showStatus(chatId, tgId) {
+// 先检查待审核记录
 db.get(
 'SELECT * FROM pending_reviews WHERE tg_id = ? AND status != ? AND status != ? ORDER BY id DESC LIMIT 1',
 [tgId, 'approved', 'rejected'],
 (err, pendingReview) => {
+
 if (pendingReview) {
+// 有待审核记录，显示审核状态
 const tier = pendingReview.tier ? config.tiers[pendingReview.tier] : null;
 let statusText = '';
 switch(pendingReview.status) {
@@ -329,30 +332,53 @@ bot.sendMessage(chatId, msg);
 return;
 }
 
-db.get('SELECT * FROM users WHERE tg_id = ?', [tgId], (err, user) => {
-if (!user || !user.game_id) {
+// 没有待审核记录，查已持有的号码（关键修复：直接查numbers表）
+db.all('SELECT * FROM numbers WHERE tg_id = ? ORDER BY created_at DESC', [tgId], (err, numbers) => {
+if (!numbers || numbers.length === 0) {
 bot.sendMessage(chatId, '❌ 您还未参与活动\n\n点击 🎮 立即参与 开始！', {
 reply_markup: { inline_keyboard: [[{ text: '🎮 立即参与', callback_data: 'join' }]] }
 });
 return;
 }
-db.all('SELECT * FROM numbers WHERE tg_id = ? ORDER BY created_at DESC LIMIT 5', [tgId], (err, numbers) => {
-const totalNumbers = numbers ? numbers.length : 0;
-const wonNumbers = numbers ? numbers.filter(n => n.is_winner).length : 0;
-const totalPrize = numbers ? numbers.reduce((sum, n) => sum + n.prize_amount, 0) : 0;
-const numberList = numbers && numbers.length > 0
-? numbers.map(n => `${n.is_winner ? '✅' : '⏳'} ${n.lucky_number}${n.prize_amount > 0 ? ' (¥' + n.prize_amount + ')' : ''}`).join('\n')
-: '暂无号码';
-bot.sendMessage(chatId, messages.userStatus({
-gameId: user.game_id, points: user.points, totalNumbers, wonNumbers, totalPrize,
-checkinStreak: user.checkin_streak, inviteCount: user.invite_count, numberList,
-timeLeft: formatTimeRemaining()
-}));
+
+// 获取用户信息（积分、签到等）
+db.get('SELECT * FROM users WHERE tg_id = ?', [tgId], (err, user) => {
+const totalNumbers = numbers.length;
+const wonNumbers = numbers.filter(n => n.is_winner).length;
+const totalPrize = numbers.reduce((sum, n) => sum + n.prize_amount, 0);
+
+// 显示最近10个号码
+const numberList = numbers.slice(0, 10).map(n =>
+`${n.is_winner ? '✅' : '⏳'} ${n.lucky_number}${n.prize_amount > 0 ? ' (¥' + n.prize_amount + ')' : ''}`
+).join('\n');
+
+const gameId = numbers[0].game_id; // 从号码记录取游戏ID
+const points = user ? user.points : 0;
+const checkinStreak = user ? user.checkin_streak : 0;
+const inviteCount = user ? user.invite_count : 0;
+
+bot.sendMessage(chatId,
+`📊 我的账户
+
+🎮 游戏ID：${gameId}
+💎 积分：${points}
+🎫 持有号码：${totalNumbers}个
+🏆 中奖：${wonNumbers}次
+💰 累计奖金：¥${totalPrize}
+📅 连续签到：${checkinStreak}天
+👥 邀请好友：${inviteCount}人
+
+🍀 最近号码：
+${numberList}
+${totalNumbers > 10 ? `\n...还有${totalNumbers - 10}个号码` : ''}
+
+⏰ ${formatTimeRemaining()}后开奖`);
 });
 });
 }
 );
 }
+
 
 function handleCheckin(chatId, tgId) {
 if (!config.features.enableCheckin) {
@@ -576,3 +602,4 @@ bot.sendMessage(chatId, resultText);
 console.log('🎰 全功能抽奖Bot已启动！');
 console.log('📱 Bot用户名：', BOT_USERNAME);
 console.log('👮 管理员：', ADMIN_IDS);
+
