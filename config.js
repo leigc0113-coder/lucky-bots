@@ -11,34 +11,79 @@ minRecharge: 100,
 
 // ========== 充值档位配置 ==========
 tiers: {
-silver: {
-code: 'silver',
+bronze: {
+code: 'bronze',
+name: '青铜档',
+minAmount: 100,
+entries: 1,
+emoji: '🥉',
+bonusPoints: 0,
+description: '入门体验'
+},
+silver300: { // 新增300档
+code: 'silver300',
 name: '白银档',
-minAmount: 100, // ← 改这里：最低金额
-entries: 1, // ← 改这里：给几个号码
+minAmount: 300,
+entries: 3,
 emoji: '🥈',
-bonusPoints: 0, // ← 改这里：赠送积分
-description: '入门级，适合新手体验'
+bonusPoints: 10,
+description: '小额参与'
 },
 gold: {
 code: 'gold',
 name: '黄金档',
-minAmount: 500, // ← 改这里
-entries: 6, // ← 改这里
+minAmount: 500,
+entries: 6,
 emoji: '🥇',
-bonusPoints: 50, // ← 改这里
-description: '性价比最高，推荐选择',
+bonusPoints: 50,
+description: '性价比最高',
 recommended: true
 },
 diamond: {
 code: 'diamond',
 name: '钻石档',
-minAmount: 1000, // ← 改这里
-entries: 15, // ← 改这里
+minAmount: 1000,
+entries: 15,
 emoji: '💎',
-bonusPoints: 200, // ← 改这里
-description: '超值大礼包，中奖率最高',
+bonusPoints: 200,
+description: '超值大礼包',
 hot: true
+},
+platinum2k: { // 新增2000档
+code: 'platinum2k',
+name: '铂金档',
+minAmount: 2000,
+entries: 35,
+emoji: '🔷',
+bonusPoints: 500,
+description: '大额优惠'
+},
+vip5k: { // 新增5000档
+code: 'vip5k',
+name: 'VIP档',
+minAmount: 5000,
+entries: 90,
+emoji: '👑',
+bonusPoints: 1500,
+description: '尊享特权'
+},
+supreme10k: { // 新增10000档
+code: 'supreme10k',
+name: '至尊档',
+minAmount: 10000,
+entries: 200,
+emoji: '🏆',
+bonusPoints: 4000,
+description: '土豪专属'
+},
+king20k: { // 新增20000档
+code: 'king20k',
+name: '王者档',
+minAmount: 20000,
+entries: 500,
+emoji: '👑',
+bonusPoints: 10000,
+description: '王者风范'
 }
 },
 // ========== 奖品配置 ==========
@@ -76,3 +121,4 @@ autoDraw: true,
 adminNotifications: true
 }
 };
+
