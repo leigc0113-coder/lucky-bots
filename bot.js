@@ -119,6 +119,30 @@ return;
 if (text === '/status') { showStatus(chatId, tgId); return; }
 if (text === '/checkin') { handleCheckin(chatId, tgId); return; }
 if (text === '/invite') { showInvite(chatId, tgId); return; }
+  if (text === '/rules') { 
+    bot.sendMessage(chatId, messages.rules(formatTiers(), formatPrizes(), config.drawTime)); 
+    return; 
+  }
+  if (text === '/help') { 
+    bot.sendMessage(chatId, 
+`📚 帮助中心
+
+🎮 参与流程：
+1. 充值最低¥${config.minRecharge}
+2. 发送截图给Bot
+3. 获得幸运号码
+4. 每晚${config.drawTime}开奖
+
+常用命令：
+/start - 开始参与
+/status - 查看账户
+/checkin - 每日签到
+/invite - 邀请好友
+/rules - 活动规则
+
+遇到问题？联系管理员！`); 
+    return; 
+  }
 if (msg.photo) { handlePhoto(chatId, tgId, msg.photo, username); return; }
 if (/^[A-Za-z0-9_-]{3,20}$/.test(text) && !text.startsWith('/')) {
 handleGameId(chatId, tgId, text);
@@ -459,5 +483,6 @@ ${today}期抽奖已结束！
 console.log('🎰 全功能抽奖Bot已启动！');
 console.log('📱 Bot用户名：', BOT_USERNAME);
 console.log('👮 管理员：', ADMIN_IDS);
+
 
 
