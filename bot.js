@@ -167,10 +167,17 @@ return;
 if (msg.photo) { handlePhoto(chatId, tgId, msg.photo, username); return; }
 
 // 处理金额输入（1-4位数字）
-if (/^\d{1,4}$/.test(text) && !text.startsWith('/')) {
-handleAmountInput(chatId, tgId, parseInt(text));
+// 处理金额输入（1-5位数字，支持到99999）
+if (/^\d{1,5}$/.test(text) && !text.startsWith('/')) {
+const amount = parseInt(text);
+if (amount >= 100) { // 最低100
+handleAmountInput(chatId, tgId, amount);
+} else {
+bot.sendMessage(chatId, `❌ 充值金额不能低于¥100`);
+}
 return;
 }
+
 
 // 处理游戏ID（7位纯数字）
 if (/^\d{7}$/.test(text)) {
@@ -353,24 +360,39 @@ const numberList = numbers.slice(0, 10).map(n =>
 ).join('\n');
 
 const gameId = numbers[0].game_id; // 从号码记录取游戏ID
-const points = user ? user.points : 0;
-const checkinStreak = user ? user.checkin_streak : 0;
-const inviteCount = user ? user.invite_count : 0;
+// 没有待审核记录，查已持有的号码
+db.all('SELECT * FROM numbers WHERE tg_id = ? ORDER BY created_at DESC', [tgId], (err, numbers) => {
+if (!numbers || numbers.length === 0) {
+bot.sendMessage(chatId, '❌ 您还未参与活动\n\n点击 🎮 立即参与 开始！', {
+reply_markup: { inline_keyboard: [[{ text: '🎮 立即参与', callback_data: 'join' }]] }
+});
+return;
+}
+
+// 成功获取号码，显示数据
+const totalNumbers = numbers.length;
+const wonNumbers = numbers.filter(n => n.is_winner).length;
+const totalPrize = numbers.reduce((sum, n) => sum + n.prize_amount, 0);
+
+const numberList = numbers.slice(0, 10).map(n =>
+`${n.is_winner ? '✅' : '⏳'} ${n.lucky_number}${n.prize_amount > 0 ? ' (¥' + n.prize_amount + ')' : ''}`
+).join('\n');
+
+const gameId = numbers[0].game_id || '未设置';
 
 bot.sendMessage(chatId,
 `📊 我的账户
 
 🎮 游戏ID：${gameId}
-💎 积分：${points}
 🎫 持有号码：${totalNumbers}个
 🏆 中奖：${wonNumbers}次
 💰 累计奖金：¥${totalPrize}
-📅 连续签到：${checkinStreak}天
-👥 邀请好友：${inviteCount}人
 
 🍀 最近号码：
 ${numberList}
 ${totalNumbers > 10 ? `\n...还有${totalNumbers - 10}个号码` : ''}
+
+✅ 数据加载成功！`)
 
 ⏰ ${formatTimeRemaining()}后开奖`);
 });
@@ -602,4 +624,5 @@ bot.sendMessage(chatId, resultText);
 console.log('🎰 全功能抽奖Bot已启动！');
 console.log('📱 Bot用户名：', BOT_USERNAME);
 console.log('👮 管理员：', ADMIN_IDS);
+
 
