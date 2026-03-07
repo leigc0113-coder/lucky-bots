@@ -338,14 +338,22 @@ bot.answerCallbackQuery(query.id);
 // ---------- 7.1 主菜单按钮处理 ----------
 
 // "立即参与"按钮
-if (data === 'join') {
-bot.sendMessage(chatId,
-'✅ 截图已收到！\n\n' +
-'📝 请输入充值金额（数字）：\n' +
-'（例如：500）\n\n' +
-'⚠️ 输入金额将决定可选档位');
-return;
-}
+  // "立即参与"按钮 - 显示参与指南
+  if (data === 'join') {
+    var guideMsg = '📱 参与流程：\n\n';
+    guideMsg += '1️⃣ 在游戏内充值（最低¥' + config.minRecharge + '）\n';
+    guideMsg += '2️⃣ 截图充值成功页面\n';
+    guideMsg += '3️⃣ 发送截图给我\n';
+    guideMsg += '4️⃣ 输入充值金额选择档位\n';
+    guideMsg += '5️⃣ 输入7位游戏ID\n';
+    guideMsg += '6️⃣ 等待审核通过获得号码\n\n';
+    guideMsg += '⏰ 每晚' + config.drawTime + '开奖！\n\n';
+    guideMsg += '✅ 请直接发送充值截图开始参与！';
+    
+    bot.sendMessage(chatId, guideMsg);
+    return;
+  }
+
 
 // "活动规则"按钮
 if (data === 'rules') {
@@ -1119,6 +1127,7 @@ console.log('👮 管理员：' + ADMIN_IDS.join(', '));
 console.log('✅ 支持档位：100, 300, 500, 1000, 2000, 5000, 10000, 20000');
 console.log('✅ 审核流程：截图 → 金额 → 档位 → ID → 审核 → 发号');
 console.log('========================================');
+
 
 
 
