@@ -224,7 +224,7 @@ totalEarned: count * config.invite.inviterPoints
 });
 }
 // ========== 充值处理 ==========
-const pendingDeposits = {};
+
 
 function handlePhoto(chatId, tgId, photo, username) {
   db.get('SELECT * FROM users WHERE tg_id = ?', [tgId], (err, user) => {
@@ -459,4 +459,5 @@ ${today}期抽奖已结束！
 console.log('🎰 全功能抽奖Bot已启动！');
 console.log('📱 Bot用户名：', BOT_USERNAME);
 console.log('👮 管理员：', ADMIN_IDS);
+
 
