@@ -182,8 +182,7 @@ const numberList = numbers && numbers.length > 0
 
 bot.sendMessage(chatId, messages.userStatus({
 gameId: user.game_id, points: user.points, totalNumbers, wonNumbers, totalPrize,
-checkinStreak: user.checkin_stre
-ak, inviteCount: user.invite_count, numberList,
+checkinStreak: user.checkin_streak, inviteCount: user.invite_count, numberList,
 timeLeft: formatTimeRemaining()
 }));
 });
@@ -460,3 +459,4 @@ ${today}期抽奖已结束！
 console.log('🎰 全功能抽奖Bot已启动！');
 console.log('📱 Bot用户名：', BOT_USERNAME);
 console.log('👮 管理员：', ADMIN_IDS);
+
