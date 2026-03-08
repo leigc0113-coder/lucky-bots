@@ -536,7 +536,7 @@ reply_markup: { inline_keyboard: keyboard }
 * @param {number} chatId - 聊天ID
 * @param {string} tgId - 用户Telegram ID
 */
-f/**
+/**
 * 显示用户状态（修复版）
 * 支持：审核中 / 已参与 / 错误提示
 */
@@ -1134,6 +1134,7 @@ console.log('👮 管理员：' + ADMIN_IDS.join(', '));
 console.log('✅ 支持档位：100, 300, 500, 1000, 2000, 5000, 10000, 20000');
 console.log('✅ 审核流程：截图 → 金额 → 档位 → ID → 审核 → 发号');
 console.log('========================================');
+
 
 
 
