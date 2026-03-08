@@ -536,19 +536,27 @@ reply_markup: { inline_keyboard: keyboard }
 * @param {number} chatId - 聊天ID
 * @param {string} tgId - 用户Telegram ID
 */
+f/**
+* 显示用户状态（修复版）
+* 支持：审核中 / 已参与 / 错误提示
+*/
 function showStatus(chatId, tgId) {
-// 先查询是否有待审核记录
+// 第一步：检查待审核记录
 db.get(
 'SELECT * FROM pending_reviews WHERE tg_id = ? AND status != ? AND status != ? ORDER BY id DESC LIMIT 1',
 [tgId, 'approved', 'rejected'],
 function(err, pendingReview) {
+if (err) {
+console.error('查询待审核记录出错:', err);
+bot.sendMessage(chatId, '❌ 查询状态失败，请稍后重试');
+return;
+}
 
-// ----- 状态A：有审核中的记录 -----
+// 有待审核记录，显示审核状态
 if (pendingReview) {
 var tier = pendingReview.tier ? config.tiers[pendingReview.tier] : null;
 var statusText = '';
 
-// 根据审核状态显示不同提示
 switch(pendingReview.status) {
 case 'awaiting_amount': statusText = '等待输入金额'; break;
 case 'awaiting_tier': statusText = '等待选择档位'; break;
@@ -558,27 +566,27 @@ case 'pending_review': statusText = '⏳ 审核中，请耐心等待...'; break;
 
 var msg = '📊 我的账户\n\n';
 msg += '🔔 当前状态：' + statusText + '\n';
-
-if (pendingReview.amount) {
-msg += '💰 充值金额：¥' + pendingReview.amount + '\n';
-}
+if (pendingReview.amount) msg += '💰 充值金额：¥' + pendingReview.amount + '\n';
 if (tier) {
 msg += '🎯 选择档位：' + tier.emoji + ' ' + tier.name + '\n';
 msg += '🎫 预计获得：' + tier.entries + '个号码\n';
 }
-if (pendingReview.game_id) {
-msg += '🎮 游戏ID：' + pendingReview.game_id + '\n';
-}
-
+if (pendingReview.game_id) msg += '🎮 游戏ID：' + pendingReview.game_id + '\n';
 msg += '\n⏳ 管理员审核通过后将自动发放号码';
 
 bot.sendMessage(chatId, msg);
 return;
 }
 
-// ----- 状态B：查询已持有的号码 -----
+// 第二步：查询已持有的号码（关键修复）
 db.all('SELECT * FROM numbers WHERE tg_id = ? ORDER BY created_at DESC', [tgId], function(err, numbers) {
-// 没有任何号码记录
+if (err) {
+console.error('查询号码出错:', err);
+bot.sendMessage(chatId, '❌ 查询号码失败，请稍后重试');
+return;
+}
+
+// 没有号码记录
 if (!numbers || numbers.length === 0) {
 bot.sendMessage(chatId, '❌ 您还未参与活动\n\n点击 🎮 立即参与 开始！', {
 reply_markup: { inline_keyboard: [[{ text: '🎮 立即参与', callback_data: 'join' }]] }
@@ -586,13 +594,12 @@ reply_markup: { inline_keyboard: [[{ text: '🎮 立即参与', callback_data: '
 return;
 }
 
-// 计算统计数据
+// 有号码，计算统计数据
 var totalNumbers = numbers.length;
 var wonNumbers = 0;
 var totalPrize = 0;
 var numberList = '';
 
-// 显示最近10个号码
 for (var i = 0; i < numbers.length && i < 10; i++) {
 var n = numbers[i];
 if (n.is_winner) wonNumbers++;
@@ -602,7 +609,6 @@ if (n.prize_amount > 0) numberList += ' (¥' + n.prize_amount + ')';
 numberList += '\n';
 }
 
-// 号码太多，显示省略
 if (totalNumbers > 10) {
 numberList += '...还有' + (totalNumbers - 10) + '个号码\n';
 }
@@ -623,6 +629,7 @@ bot.sendMessage(chatId, finalMsg);
 }
 );
 }
+
 
 /**
 * 处理每日签到
@@ -1127,6 +1134,7 @@ console.log('👮 管理员：' + ADMIN_IDS.join(', '));
 console.log('✅ 支持档位：100, 300, 500, 1000, 2000, 5000, 10000, 20000');
 console.log('✅ 审核流程：截图 → 金额 → 档位 → ID → 审核 → 发号');
 console.log('========================================');
+
 
 
 
