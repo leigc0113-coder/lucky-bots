@@ -50,14 +50,17 @@ function initDatabase() {
     ')');
     
     // 4.2 号码表：存储所有已发放的幸运号码
+        // 4.2 号码表：存储所有已发放的幸运号码
     db.run('CREATE TABLE IF NOT EXISTS numbers (' +
-      'lucky_number INTEGER PRIMARY KEY, ' +  // 6位幸运号码，主键
-      'tg_id TEXT, ' +                        // 所属用户
-      'game_id TEXT, ' +                      // 游戏ID
-      'tier TEXT, ' +                         // 充值档位代码
-      'is_winner INTEGER DEFAULT 0, ' +       // 是否中奖（0=否，1=是）
-      'prize_amount INTEGER DEFAULT 0' +      // 中奖金额
+      'lucky_number INTEGER PRIMARY KEY, ' +// 6位幸运号码，主键
+      'tg_id TEXT, ' +                     // 所属用户
+      'game_id TEXT, ' +                    // 游戏ID
+      'tier TEXT, ' +                        // 充值档位代码
+      'is_winner INTEGER DEFAULT 0, ' +      // 是否中奖（0=否，1=是）
+      'prize_amount INTEGER DEFAULT 0, ' +   // 中奖金额
+      'created_at TEXT DEFAULT CURRENT_TIMESTAMP' +  // 添加这一行！
     ')');
+
     
     // 4.3 签到表：存储每日签到记录
     db.run('CREATE TABLE IF NOT EXISTS checkins (' +
@@ -1134,6 +1137,7 @@ console.log('👮 管理员：' + ADMIN_IDS.join(', '));
 console.log('✅ 支持档位：100, 300, 500, 1000, 2000, 5000, 10000, 20000');
 console.log('✅ 审核流程：截图 → 金额 → 档位 → ID → 审核 → 发号');
 console.log('========================================');
+
 
 
 
